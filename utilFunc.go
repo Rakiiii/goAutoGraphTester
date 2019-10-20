@@ -233,16 +233,16 @@ func saveGraphHandlerResult(config *TestConfig, it int) (string, error) {
 	if config.SaveResultOfGraphHandlerFlag {
 		//save to cutom dir
 		if config.PathToDirForResult != "" {
-			if err := Copy(config.GraphPath, config.PathToDirForResult+"/ResultedGraph_"+strconv.Itoa(it)); err != nil {
+			if err := Copy(config.PathToFileWithResult, config.PathToDirForResult+"/ResultedGraph_"+strconv.Itoa(it)); err != nil {
 				return "", err
 			}
 			return config.PathToDirForResult + "/ResultedGraph_" + strconv.Itoa(it), nil
 		} else {
 			//save to def dir
-			if err := Copy(config.GraphPath, "GraphResult"+"/graph_"+strconv.Itoa(it)); err != nil {
+			if err := Copy(config.PathToFileWithResult, "GraphResult"+"/Resultedraph_"+strconv.Itoa(it)); err != nil {
 				return "", err
 			}
-			return "GraphResult" + "/graph_" + strconv.Itoa(it), nil
+			return "GraphResult" + "/ResultedGraph_" + strconv.Itoa(it), nil
 		}
 	} else {
 		return "-1", nil
