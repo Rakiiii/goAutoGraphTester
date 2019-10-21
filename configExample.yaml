@@ -8,6 +8,7 @@
 #Can hold 2 values wright now:
 # "vertextest" : for testing perfomance dependency on amount of vertex
 # "edgestest" : for testing perfomance dependency on amount of edges 
+# "ittest" : for testing results improvments depending to amount of itteration inside your graphhandler
 type_of_test: vertextest
 
 #get state of test to stdout
@@ -144,6 +145,7 @@ graphhandler_config:
     #if you need to insert amount of edges to flags of your grpahhandler add "Aedges" to flags
     #if you need to insert amount of vertex to flags of your grpahhandler add "Avertex" to flags
     #if you nedd to pass graph name equls to graphpath add "GraphPath" to flags
+    #if you need to pass amount of itteration from "ittest" set it "iter"
   graphhandler_flags: 
   - '-s'
   - GraphPath
@@ -161,3 +163,21 @@ graphhandler_config:
   #if you want to see out put of your graphhandler set it true,other ones set it false
   ghoutput: true
 
+#config of for type it test
+ittest_config:
+  
+  #set behavor of graph generator
+  #set it "no" if you do not need to start your graph gene at all and you put your generated graph with name <graphpath> at directory yourself
+  #set "once" if you need to start graphgene once
+  #every time if you need to start your graphgene every itteration
+  graphgenerator_behavor:
+
+  #path to file that contains on the first line number with result of graph handler
+  #by def equls to <path_to_file_with_result>
+  result_path:
+
+  #start amount of itteration pased to "it" param
+  start_amount_of_itteration:
+
+  #step size for itterations
+  itteration_difference:

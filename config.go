@@ -34,8 +34,9 @@ type TestConfig struct {
 	PathToDirForGeneratedGraph string `yaml:"path_to_dir_for_coping_generated_graph"`
 	GraphPath                  string `yaml:"graphpath"`
 
-	GGCFG GraphGeneratorConfig `yaml:"graphgenerator_config"`
-	GHCFG GraphHandlerConfig   `yaml:"graphhandler_config"`
+	GGCFG GraphGeneratorConfig  `yaml:"graphgenerator_config"`
+	GHCFG GraphHandlerConfig    `yaml:"graphhandler_config"`
+	ITCFG ItterrationTestConfig `yaml:"ittest_config"`
 }
 
 type GraphGeneratorConfig struct {
@@ -56,6 +57,13 @@ type GraphHandlerConfig struct {
 	VMStarter           string   `yaml:"vmstartergh"`
 	VMStarterFlags      []string `yaml:"vmstartergh_flags"`
 	Output              bool     `yaml:"ghoutput"`
+}
+
+type ItterrationTestConfig struct {
+	GraphGeneratorBefavor      string `yaml:"graphgenerator_behavor"`
+	PathToFileWithResult       string `yaml:"path_to_file_with_result"`
+	StartingAmountOfItteration int    `yaml:"start_amount_of_itteration"`
+	ItterrationDifference      int    `yaml:"itteration_difference"`
 }
 
 func readConfig(configName string) (*TestConfig, error) {

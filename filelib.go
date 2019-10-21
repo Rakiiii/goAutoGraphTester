@@ -51,40 +51,66 @@ func AppendStringToFile(path, text string, it int) error {
 }
 
 func DrawPlotCust(file *os.File, conf *TestConfig, n int) error {
-	getPoints := func() (plotter.XYs, error) {
-		pts := make(plotter.XYs, n)
-		itter := 0
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			elems := strings.Fields(scanner.Text())
+	var getPoints func() (plotter.XYs, error)
+	if conf.TypeOfTest != "ittest" {
+		getPoints = func() (plotter.XYs, error) {
+			pts := make(plotter.XYs, n)
+			itter := 0
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				elems := strings.Fields(scanner.Text())
 
-			if conf.TypeOfTest == "vertextest" {
+				if conf.TypeOfTest == "vertextest" {
+					num, err := strconv.Atoi(elems[0])
+					if err != nil {
+						return nil, err
+					}
+					pts[itter].X = float64(num)
+				}
+
+				if conf.TypeOfTest == "edgestest" {
+					num, err := strconv.Atoi(elems[1])
+					if err != nil {
+						return nil, err
+					}
+					pts[itter].X = float64(num)
+				}
+
+				num, err := strconv.Atoi(strings.Trim(elems[4], "ms"))
+				if err != nil {
+					return nil, err
+				}
+
+				pts[itter].Y = float64(num)
+				itter++
+			}
+			return pts, scanner.Err()
+		}
+	} else {
+		getPoints = func() (plotter.XYs, error) {
+			pts := make(plotter.XYs, n)
+			itter := 0
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				elems := strings.Fields(scanner.Text())
 				num, err := strconv.Atoi(elems[0])
 				if err != nil {
 					return nil, err
 				}
 				pts[itter].X = float64(num)
-			}
 
-			if conf.TypeOfTest == "edgestest" {
-				num, err := strconv.Atoi(elems[1])
+				num, err = strconv.Atoi(elems[1])
 				if err != nil {
 					return nil, err
 				}
-				pts[itter].X = float64(num)
-			}
 
-			num, err := strconv.Atoi(strings.Trim(elems[4], "ms"))
-			if err != nil {
-				return nil, err
+				pts[itter].Y = float64(num)
+				itter++
 			}
-
-			pts[itter].Y = float64(num)
-			itter++
+			return pts, scanner.Err()
 		}
-		return pts, scanner.Err()
-	}
 
+	}
 	graphicalPoints, err := getPoints()
 	if err != nil {
 		return err
@@ -98,14 +124,17 @@ func DrawPlotCust(file *os.File, conf *TestConfig, n int) error {
 
 	plot.Title.Text = conf.GraphicTitle
 
-	plot.Y.Label.Text = "Time,ms"
-
-	if conf.TypeOfTest == "vertextest" {
+	switch conf.TypeOfTest {
+	case "vertextest":
 		plot.X.Label.Text = "Amount of vertex"
-	}
-
-	if conf.TypeOfTest == "edgestest" {
+		plot.Y.Label.Text = "Time,ms"
+	case "edgestest":
 		plot.X.Label.Text = "Amount of edges"
+		plot.Y.Label.Text = "Time,ms"
+	case "ittest":
+		plot.X.Label.Text = "Amount of itterations"
+		plot.Y.Label.Text = "Value"
+
 	}
 
 	err = plotutil.AddLinePoints(plot, graphicalPoints)

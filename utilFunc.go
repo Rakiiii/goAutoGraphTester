@@ -88,6 +88,9 @@ func startGraphGene(config *TestConfig, it int) error {
 		if flag == "GraphPath" {
 			flags[i] = config.GraphPath
 		}
+		if flag == "it" {
+			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
+		}
 	}
 
 	var graphgene *exec.Cmd
@@ -180,6 +183,9 @@ func startGraphHandler(config *TestConfig, it int) error {
 		if flag == "GraphPath" {
 			flags[i] = config.GraphPath
 		}
+		if flag == "it" {
+			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
+		}
 	}
 
 	var graphhandler *exec.Cmd
@@ -246,6 +252,27 @@ func saveGraphHandlerResult(config *TestConfig, it int) (string, error) {
 		}
 	} else {
 		return "-1", nil
+	}
+}
+
+func getResult(config *TestConfig) (string, error) {
+	if config.ITCFG.PathToFileWithResult == "" {
+		file, err := os.Open(config.PathToFileWithResult)
+		if err != nil {
+			return "", err
+		}
+		scanner := bufio.NewScanner(file)
+		scanner.Scan()
+		return scanner.Text(), nil
+
+	} else {
+		file, err := os.Open(config.ITCFG.PathToFileWithResult)
+		if err != nil {
+			return "", err
+		}
+		scanner := bufio.NewScanner(file)
+		scanner.Scan()
+		return scanner.Text(), nil
 	}
 }
 
