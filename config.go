@@ -37,6 +37,8 @@ type TestConfig struct {
 	GGCFG GraphGeneratorConfig  `yaml:"graphgenerator_config"`
 	GHCFG GraphHandlerConfig    `yaml:"graphhandler_config"`
 	ITCFG ItterrationTestConfig `yaml:"ittest_config"`
+	PTCFG ParseTestConfig       `yaml:"parsetest_config"`
+	MTCFG MarkTestConfig 		`yaml:"marktest_config"`
 }
 
 type GraphGeneratorConfig struct {
@@ -61,9 +63,23 @@ type GraphHandlerConfig struct {
 
 type ItterrationTestConfig struct {
 	GraphGeneratorBefavor      string `yaml:"graphgenerator_behavor"`
-	PathToFileWithResult       string `yaml:"path_to_file_with_result"`
+	PathToFileWithResult       string `yaml:"result_path"`
 	StartingAmountOfItteration int    `yaml:"start_amount_of_itteration"`
 	ItterrationDifference      int    `yaml:"itteration_difference"`
+}
+
+type ParseTestConfig struct {
+	PathToDir            string `yaml:"path_to_dir_with_files"`
+	FileMask             string `yaml:"file_mask"`
+	PathToFileWithResult string `yaml:"result_path_parsed"`
+	File                 string
+}
+
+type MarkTestConfig struct{
+	WithFMMark			bool`yaml:"contains_mark"`
+	PathToFile 			string `yaml:"path_to_file"`
+	DrawDiffGraphic		bool`yaml:"draw_diff_graphic"`
+	DrawDynGraphic		bool`yaml:"draw_dyn_graphic"`
 }
 
 func readConfig(configName string) (*TestConfig, error) {

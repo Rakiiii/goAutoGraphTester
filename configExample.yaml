@@ -9,6 +9,7 @@
 # "vertextest" : for testing perfomance dependency on amount of vertex
 # "edgestest" : for testing perfomance dependency on amount of edges 
 # "ittest" : for testing results improvments depending to amount of itteration inside your graphhandler
+# "parsetest" : for test on some files from dir
 type_of_test: vertextest
 
 #get state of test to stdout
@@ -181,3 +182,30 @@ ittest_config:
 
   #step size for itterations
   itteration_difference:
+
+#config for parser test
+parsetest_config:
+
+  #directory that contains file to handle
+  path_to_dir_with_files:
+  
+  #patter of file name wich you want to handle
+  file_mask:
+
+  #path to file that contains on the first line number with result of graph handler
+  #by def equls to <path_to_file_with_result>
+  result_path_parsed:
+
+#config for mark test
+marktest_config:
+  #do mark test flag bool type
+ contains_mark: true
+
+  #path to file with mark
+  path_to_file: mark
+
+  #draw differense between mark and result candle plot
+  draw_diff_graphic: true
+
+  #draw mark-result progression graphic
+  draw_dyn_graphic: true

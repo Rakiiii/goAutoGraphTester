@@ -3,11 +3,13 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 )
 
@@ -76,22 +78,7 @@ func startGraphGene(config *TestConfig, it int) error {
 	amountOfVertex, amountOfEdges := countAmount(config, it)
 
 	//generate configs
-	flags := make([]string, len(config.GGCFG.GraphGeneratorFlags))
-	copy(flags, config.GGCFG.GraphGeneratorFlags)
-	for i, flag := range flags {
-		if flag == "Avertex" {
-			flags[i] = strconv.Itoa(amountOfVertex)
-		}
-		if flag == "Aedges" {
-			flags[i] = strconv.Itoa(amountOfEdges)
-		}
-		if flag == "GraphPath" {
-			flags[i] = config.GraphPath
-		}
-		if flag == "it" {
-			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
-		}
-	}
+	flags := *parseFlags(&config.GGCFG.GraphGeneratorFlags, amountOfVertex, amountOfEdges, it, config, config.PTCFG.File)
 
 	var graphgene *exec.Cmd
 	if config.GGCFG.GraphGeneratorType != "" {
@@ -122,6 +109,7 @@ func startGraphGene(config *TestConfig, it int) error {
 	}
 
 	if err := graphgene.Run(); err != nil {
+		log.Println(flags)
 		return err
 	}
 
@@ -167,26 +155,14 @@ func copyGraph(config *TestConfig, itterator int) (string, error) {
 }
 
 func startGraphHandler(config *TestConfig, it int) error {
+	var lo logger = logger{config.OutputFlag}
 	//count amount of vertex and edges on itteration
 	amountOfVertex, amountOfEdges := countAmount(config, it)
 
 	//generate configs
-	flags := make([]string, len(config.GHCFG.GraphHandlerFlags))
-	copy(flags, config.GHCFG.GraphHandlerFlags)
-	for i, flag := range flags {
-		if flag == "Avertex" {
-			flags[i] = strconv.Itoa(amountOfVertex)
-		}
-		if flag == "Aedges" {
-			flags[i] = strconv.Itoa(amountOfEdges)
-		}
-		if flag == "GraphPath" {
-			flags[i] = config.GraphPath
-		}
-		if flag == "it" {
-			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
-		}
-	}
+	flags := *parseFlags(&config.GHCFG.GraphHandlerFlags, amountOfVertex, amountOfEdges, it, config, config.PTCFG.File)
+
+	fmt.Println(flags)
 
 	var graphhandler *exec.Cmd
 	if config.GHCFG.GraphHandlerType != "" {
@@ -200,37 +176,49 @@ func startGraphHandler(config *TestConfig, it int) error {
 		graphhandler = exec.Command(config.GHCFG.VMStarter, stVMFlags...)
 	} else {
 		graphhandler = exec.Command(config.GHCFG.GraphHandlerPath, flags...)
+
 	}
 
-	var stdout io.ReadCloser
+	lo.log("std out start")
+
+	//var stdout io.ReadCloser
 	if config.GHCFG.Output {
-		var err error
-		stdout, err = graphhandler.StdoutPipe()
-		if err != nil {
-			return err
-		}
+
+		graphhandler.Stdout = os.Stdout
+		/*
+			var err error
+			stdout, err = graphhandler.StdoutPipe()
+			if err != nil {
+				return err
+			}*/
 	}
 
-	stderr, err := graphhandler.StderrPipe()
+	lo.log("stderr start")
+	graphhandler.Stderr = os.Stderr
+	/*stderr, err := graphhandler.StderrPipe()
 	if err != nil {
 		return err
-	}
+	}*/
 
+	lo.log("handler started with out vm")
 	if err := graphhandler.Run(); err != nil {
 		return err
 	}
+	lo.log("handler finished")
 
-	errout, _ := ioutil.ReadAll(stderr)
+	/*errout, _ := ioutil.ReadAll(stderr)
 	if string(errout) != "" {
 		log.Printf("%s\n", errout)
-	}
+	}*/
+	lo.log("stderr end")
 
 	if config.GHCFG.Output {
-		out, _ := ioutil.ReadAll(stdout)
+		/*out, _ := ioutil.ReadAll(stdout)
 		if string(out) != "" {
 			log.Printf("%s\n", out)
-		}
+		}*/
 	}
+	lo.log("stdout stoped")
 
 	return nil
 }
@@ -276,6 +264,27 @@ func getResult(config *TestConfig) (string, error) {
 	}
 }
 
+func getResultFromParsed(config *TestConfig) (string, error) {
+	if config.PTCFG.PathToFileWithResult == "" {
+		file, err := os.Open(config.PathToFileWithResult)
+		if err != nil {
+			return "", err
+		}
+		scanner := bufio.NewScanner(file)
+		scanner.Scan()
+		return scanner.Text(), nil
+
+	} else {
+		file, err := os.Open(config.PTCFG.PathToFileWithResult)
+		if err != nil {
+			return "", err
+		}
+		scanner := bufio.NewScanner(file)
+		scanner.Scan()
+		return scanner.Text(), nil
+	}
+}
+
 func getTime(config *TestConfig) (string, error) {
 	//open file to read duration of gh work
 	timeFile, err := os.Open(config.PathToFileWithTime)
@@ -293,3 +302,78 @@ func getTime(config *TestConfig) (string, error) {
 		return scanner.Text(), nil
 	}
 }
+
+func parseFlags(pars *[]string, amountOfVertex, amountOfEdges, it int, config *TestConfig, parsedgraph string) *[]string {
+	flags := make([]string, len(*pars))
+	copy(flags, *pars)
+	for i, flag := range flags {
+		if flag == "Avertex" {
+			flags[i] = strconv.Itoa(amountOfVertex)
+		}
+		if flag == "Aedges" {
+			flags[i] = strconv.Itoa(amountOfEdges)
+		}
+		if flag == "GraphPath" {
+			flags[i] = config.GraphPath
+		}
+		if flag == "it" {
+			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
+		}
+		if flag == "pgraph" {
+			flags[i] = parsedgraph
+		}
+	}
+	return &flags
+}
+
+func getSliceOfGrpahs(config *TestConfig) (*[]string, error) {
+	res, err := filepath.Glob(config.PTCFG.PathToDir + config.PTCFG.FileMask)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func getMark(config *TestConfig)(string,error){
+	if config.MTCFG.WithFMMark{
+		//open file to read duration of gh work
+		markFile, err := os.Open(config.MTCFG.PathToFile)
+		if err != nil {
+			return "", err
+		}
+		defer markFile.Close()
+	
+		//read duration
+		scanner := bufio.NewScanner(markFile)
+		scanner.Scan()
+		if scanner.Err() != nil {
+			return "", scanner.Err()
+		} else {
+			return scanner.Text(), nil
+		}
+	}else{
+		return "",nil
+	}
+}
+
+/*func getResult(config *TestConfig)(string,error){
+	if config.MTCFG.WithFMMark {
+		//open file to read duration of gh work
+		resFile, err := os.Open(config.PathToFileWithResult)
+		if err != nil {
+			return "", err
+		}
+		defer resFile.Close()
+
+		//read duration
+		scanner := bufio.NewScanner(resFile)
+		scanner.Scan()
+		if scanner.Err() != nil {
+			return "", scanner.Err()
+		} else {
+			return scanner.Text(), nil
+		}				
+	} else {
+		return "-1", nil
+	}
+}*/
