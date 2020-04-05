@@ -13,6 +13,13 @@ import (
 	"strconv"
 )
 
+const (
+	DEFFRESDIR = "GraphResult"
+	DEFFGRPAHDIR = "GeneratedGraphs"
+	DEFFGRAPHNAME = "/graph_"
+	DEFFRESNAME = "/ResultedGraph_"
+)
+
 type logger struct {
 	state bool
 }
@@ -37,8 +44,8 @@ func createResDir(config *TestConfig) error {
 			}
 		} else {
 			//creating deffult dir
-			if _, err := os.Stat("GraphResult"); os.IsNotExist(err) {
-				if err := os.MkdirAll("GraphResult", os.ModePerm); err != nil {
+			if _, err := os.Stat(DEFFRESDIR); os.IsNotExist(err) {
+				if err := os.MkdirAll(DEFFRESDIR, os.ModePerm); err != nil {
 					return err
 				}
 			}
@@ -59,8 +66,8 @@ func createGraphDir(config *TestConfig) error {
 				}
 			}
 		} else {
-			if _, err := os.Stat("GeneratedGraphs"); os.IsNotExist(err) {
-				if err := os.MkdirAll("GeneratedGraphs", os.ModePerm); err != nil {
+			if _, err := os.Stat(DEFFGRPAHDIR); os.IsNotExist(err) {
+				if err := os.MkdirAll(DEFFGRPAHDIR, os.ModePerm); err != nil {
 					return err
 				}
 			}
@@ -135,16 +142,16 @@ func copyGraph(config *TestConfig, itterator int) (string, error) {
 		if config.GraphPath != "" {
 			if config.PathToDirForGeneratedGraph != "" {
 				//save to custom dir
-				if err := Copy(config.GraphPath, config.PathToDirForGeneratedGraph+"/graph_"+strconv.Itoa(itterator)); err != nil {
+				if err := Copy(config.GraphPath, config.PathToDirForGeneratedGraph+DEFFGRAPHNAME+strconv.Itoa(itterator)); err != nil {
 					return "", nil
 				}
-				return config.PathToDirForGeneratedGraph + "/graph_" + strconv.Itoa(itterator), nil
+				return config.PathToDirForGeneratedGraph + DEFFGRAPHNAME + strconv.Itoa(itterator), nil
 			} else {
 				//save to def dir
-				if err := Copy(config.GraphPath, "GeneratedGraphs"+"/graph_"+strconv.Itoa(itterator)); err != nil {
+				if err := Copy(config.GraphPath, DEFFGRPAHDIR+DEFFGRAPHNAME+strconv.Itoa(itterator)); err != nil {
 					return "", err
 				}
-				return "GeneratedGraphs" + "/graph_" + strconv.Itoa(itterator), nil
+				return DEFFGRPAHDIR + DEFFGRAPHNAME + strconv.Itoa(itterator), nil
 			}
 		} else {
 			return "-1", nil
@@ -185,20 +192,12 @@ func startGraphHandler(config *TestConfig, it int) error {
 	if config.GHCFG.Output {
 
 		graphhandler.Stdout = os.Stdout
-		/*
-			var err error
-			stdout, err = graphhandler.StdoutPipe()
-			if err != nil {
-				return err
-			}*/
+
 	}
 
 	lo.log("stderr start")
 	graphhandler.Stderr = os.Stderr
-	/*stderr, err := graphhandler.StderrPipe()
-	if err != nil {
-		return err
-	}*/
+
 
 	lo.log("handler started with out vm")
 	if err := graphhandler.Run(); err != nil {
@@ -206,18 +205,8 @@ func startGraphHandler(config *TestConfig, it int) error {
 	}
 	lo.log("handler finished")
 
-	/*errout, _ := ioutil.ReadAll(stderr)
-	if string(errout) != "" {
-		log.Printf("%s\n", errout)
-	}*/
 	lo.log("stderr end")
 
-	if config.GHCFG.Output {
-		/*out, _ := ioutil.ReadAll(stdout)
-		if string(out) != "" {
-			log.Printf("%s\n", out)
-		}*/
-	}
 	lo.log("stdout stoped")
 
 	return nil
@@ -227,16 +216,16 @@ func saveGraphHandlerResult(config *TestConfig, it int) (string, error) {
 	if config.SaveResultOfGraphHandlerFlag {
 		//save to cutom dir
 		if config.PathToDirForResult != "" {
-			if err := Copy(config.PathToFileWithResult, config.PathToDirForResult+"/ResultedGraph_"+strconv.Itoa(it)); err != nil {
+			if err := Copy(config.PathToFileWithResult, config.PathToDirForResult+DEFFRESNAME+strconv.Itoa(it)); err != nil {
 				return "", err
 			}
-			return config.PathToDirForResult + "/ResultedGraph_" + strconv.Itoa(it), nil
+			return config.PathToDirForResult + DEFFRESNAME + strconv.Itoa(it), nil
 		} else {
 			//save to def dir
-			if err := Copy(config.PathToFileWithResult, "GraphResult"+"/Resultedraph_"+strconv.Itoa(it)); err != nil {
+			if err := Copy(config.PathToFileWithResult, DEFFRESDIR+DEFFRESNAME+strconv.Itoa(it)); err != nil {
 				return "", err
 			}
-			return "GraphResult" + "/ResultedGraph_" + strconv.Itoa(it), nil
+			return DEFFRESDIR + DEFFRESNAME + strconv.Itoa(it), nil
 		}
 	} else {
 		return "-1", nil
@@ -307,19 +296,19 @@ func parseFlags(pars *[]string, amountOfVertex, amountOfEdges, it int, config *T
 	flags := make([]string, len(*pars))
 	copy(flags, *pars)
 	for i, flag := range flags {
-		if flag == "Avertex" {
+		if flag == VERTEXFLAG {
 			flags[i] = strconv.Itoa(amountOfVertex)
 		}
-		if flag == "Aedges" {
+		if flag == EDGEFLAG {
 			flags[i] = strconv.Itoa(amountOfEdges)
 		}
-		if flag == "GraphPath" {
+		if flag == GRAPHPATHFLAG {
 			flags[i] = config.GraphPath
 		}
-		if flag == "it" {
+		if flag == ITFLAG{
 			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
 		}
-		if flag == "pgraph" {
+		if flag == PARSEGRAPHFLAG {
 			flags[i] = parsedgraph
 		}
 	}
@@ -356,24 +345,21 @@ func getMark(config *TestConfig)(string,error){
 	}
 }
 
-/*func getResult(config *TestConfig)(string,error){
-	if config.MTCFG.WithFMMark {
-		//open file to read duration of gh work
-		resFile, err := os.Open(config.PathToFileWithResult)
-		if err != nil {
-			return "", err
+func getAdvancedTime(config *TestConfig)(string,error){
+	if config.ATCFG.EnableAdvTime{
+		advtimeFile,err := os.Open(config.ATCFG.PathToFile)
+		if err != nil{
+			return "",err
 		}
-		defer resFile.Close()
-
-		//read duration
-		scanner := bufio.NewScanner(resFile)
-		scanner.Scan()
-		if scanner.Err() != nil {
-			return "", scanner.Err()
-		} else {
-			return scanner.Text(), nil
-		}				
-	} else {
-		return "-1", nil
+		defer advtimeFile.Close()
+		
+		res := ""
+		scanner := bufio.NewScanner(advtimeFile)
+		for scanner.Scan(){
+			res += scanner.Text() + "\n"
+		}
+		return res,nil
+	}else{
+		return "",nil
 	}
-}*/
+}

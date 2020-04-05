@@ -209,3 +209,35 @@ marktest_config:
 
   #draw mark-result progression graphic
   draw_dyn_graphic: true
+
+#config for advanced time testing option
+#tester will found file @path_to_file put it to advtimeTab(1 colum is amount of edges[if edgetest] or vertex[if vertex test] 
+#after information from @path_to_file)
+#at the end of work it will draw graphic of time distribution if @draw_distribution_graphic is true
+advtime_config:
+  #flag for usage advtime
+  #can be true or false
+  enable_adv_time: true
+
+  #path to file where tester will take advanced time charcteristic 
+  path_to_file: advtime
+
+  #flag for drawing distrubution of time from @path_to_file_with_adv_time
+  #can be true or false
+  draw_distribution_graphic: true
+  
+  #config for adv time plot
+  adv_graphic_config:
+    #set of color 
+    #collection of strings 
+    #every string is hex number length 4 or 7
+    color_set:
+      - "#0000FF"
+      - "#00FF00"
+      
+    #set of name for color
+    #collection of strings for plot legends
+    #must be the same length as @color_set
+    name_set:
+      - "time for mark"
+      - "time for partition"

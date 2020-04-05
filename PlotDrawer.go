@@ -44,4 +44,18 @@ func main() {
 			return
 		}
 	}
+	if config.ATCFG.DrawDistribGraphic {
+		advtimeFile,err := os.Open(PathToAdvTimeFile)
+		if err != nil{
+			log.Println(err)
+			return
+		}
+		defer advtimeFile.Close()
+		log.Println("draw distribution graphic")
+		err = DrawAdvtimeDistribution(advtimeFile,config,am)
+		if err != nil{
+			log.Println(err)
+			return
+		}
+	}
 }

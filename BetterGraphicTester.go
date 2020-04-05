@@ -6,9 +6,11 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"io"
+	//"bufio"
 )
 
-var PathToResultFile string = "ResultTab"
+//var PathToResultFile string = "ResultTab"
 
 var lo logger = logger{state:true}
 
@@ -19,6 +21,11 @@ func main() {
 		log.Println(err)
 		return
 	}
+
+	/*fmt.Println("enable adv time:",config.ATCFG.EnableAdvTime)
+	fmt.Println("enable draw graphic:",config.ATCFG.DrawDistribGraphic)
+	fmt.Print("Press 'Enter' to continue...")
+  	bufio.NewReader(os.Stdin).ReadBytes('\n')*/
 
 		
 
@@ -49,6 +56,15 @@ func main() {
 
 	lo.log("result file created")
 
+	//create file for results
+	advtimeFile, err := os.Create(PathToAdvTimeFile)
+	if err != nil {
+		fmt.Println(err)
+		advtimeFile.Close()
+		return
+	}
+	advtimeFile.Close()
+
 	var prevTime time.Duration
 	var itterator int = 0
 	timeFlag := true
@@ -57,7 +73,7 @@ func main() {
 
 	for timeFlag && itterationFlag {
 		switch {
-		case config.TypeOfTest == "edgestest" || config.TypeOfTest == "vertextest":
+		case config.TypeOfTest == EDGETEST || config.TypeOfTest == VERTEXTEST:
 
 			lo.log("start vertex of edges test")
 
@@ -126,15 +142,39 @@ func main() {
 
 			lo.log("time parsed")
 
-			//get string with mark
-			resString[6], err = getMark(config)
-			if err != nil {
-				log.Println(err)
-				return
-			}	
 
+			//get string with mark
 			if config.MTCFG.WithFMMark{
+				resString[6], err = getMark(config)
+				if err != nil {
+					log.Println(err)
+					return
+				}	
 				lo.log("mark parsed")
+			}
+
+			//get string with advtime if enable
+			if config.ATCFG.EnableAdvTime{
+				advtime := ""
+				if config.TypeOfTest == EDGETEST {
+					advtime += strconv.Itoa(amE)
+				}
+				if config.TypeOfTest == VERTEXTEST{
+					advtime += strconv.Itoa(amV)
+				}
+				tmp,err := getAdvancedTime(config)
+				if err != nil{
+					log.Println(err)
+					return
+				}
+				advtime += " " + tmp[:(len(tmp)-1)]
+				lo.log("advtime parsed")
+
+				if err = AppendStringToFile(PathToAdvTimeFile,advtime,itterator);err != nil{
+					log.Println(err)
+					return
+				}
+				lo.log("advtime appended")
 			}
 
 			//make res string
@@ -152,7 +192,9 @@ func main() {
 
 			lo.log("result added to file")
 
-		case config.TypeOfTest == "ittest":
+
+
+		case config.TypeOfTest == ITTEST:
 			resString := make([]string, 5)
 
 			resString[0] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*itterator)
@@ -211,14 +253,30 @@ func main() {
 			lo.log("result value getted")
 
 			//get string with mark
-			resString[5], err = getMark(config)
-			if err != nil {
-				log.Println(err)
-				return
-			}	
-			
 			if config.MTCFG.WithFMMark{
+				resString[5], err = getMark(config)
+				if err != nil {
+					log.Println(err)
+					return
+				}	
 				lo.log("mark parsed")
+			}
+
+						//get string with advtime if enable
+			if config.ATCFG.EnableAdvTime{
+				advtime := strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*itterator)
+				tmp,err := getAdvancedTime(config)
+				if err != nil{
+					log.Println(err)
+					return
+				}
+				advtime +=  " " +  tmp[:(len(tmp)-1)]
+				lo.log("advtime parsed")
+				if err = AppendStringToFile(PathToAdvTimeFile,advtime,itterator);err != nil{
+					log.Println(err)
+					return
+				}
+				lo.log("advtime appended")
 			}
 
 			//make res string
@@ -233,7 +291,7 @@ func main() {
 				log.Println(err)
 				return
 			}
-		case config.TypeOfTest == "parsetest":
+		case config.TypeOfTest == PARSETEST:
 
 			resString := make([]string, 2)
 
@@ -304,18 +362,18 @@ func main() {
 		}
 
 		//stop condition
-		if (config.TypeOfStopCondition == "timestop" || config.TypeOfStopCondition == "mixed") && prevTime.Milliseconds() > config.MaxTimeForItteration {
+		if (config.TypeOfStopCondition == TIMESTOP || config.TypeOfStopCondition == MIXEDSTOP) && prevTime.Milliseconds() > config.MaxTimeForItteration {
 			timeFlag = false
 		}
 
-		if (config.TypeOfStopCondition == "itstop" || config.TypeOfStopCondition == "mixed") && config.AmountOfItterations <= itterator {
+		if (config.TypeOfStopCondition == ITSTOP || config.TypeOfStopCondition == MIXEDSTOP) && config.AmountOfItterations <= itterator {
 			itterationFlag = false
 		}
 
 		itterator++
 	}
 
-	if config.TypeOfTest != "parsetest" {
+	if config.TypeOfTest != PARSETEST {
 		//open file with results
 		resFile, err = os.Open(PathToResultFile)
 		if err != nil {
@@ -333,6 +391,7 @@ func main() {
 
 		if config.MTCFG.DrawDiffGraphic{
 			lo.log("draw diff graphic")
+			resFile.Seek(0, io.SeekStart)
 			err = DrawMarkDiff(resFile, config, itterator)
 			if err != nil {
 				fmt.Println(err)
@@ -340,10 +399,26 @@ func main() {
 			}
 		}
 		if config.MTCFG.DrawDynGraphic{
+			resFile.Seek(0, io.SeekStart)
 			lo.log("draw progression graphic")
 			err = DrawMarkProgression(resFile, config, itterator)
 			if err != nil {
 				fmt.Println(err)
+				return
+			}
+		}
+
+		if config.ATCFG.DrawDistribGraphic {
+			advtimeFile,err := os.Open(PathToAdvTimeFile)
+			if err != nil{
+				log.Println(err)
+				return
+			}
+			defer advtimeFile.Close()
+			lo.log("draw distribution graphic")
+			err = DrawAdvtimeDistribution(advtimeFile,config,itterator)
+			if err != nil{
+				log.Println(err)
 				return
 			}
 		}

@@ -7,6 +7,23 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	PathToResultFile = "ResultTab"
+	PathToAdvTimeFile = "AdvTimeTab"
+	EDGETEST = "edgestest"
+	VERTEXTEST = "vertextest"
+	ITTEST = "ittest"
+	PARSETEST = "parsetest"
+	TIMESTOP = "timestop"
+	ITSTOP = "itstop"
+	MIXEDSTOP = "mixed"
+	VERTEXFLAG = "Avertex"
+	EDGEFLAG = "Aedges"
+	GRAPHPATHFLAG = "GraphPath"
+	ITFLAG =  "it" 
+	PARSEGRAPHFLAG = "pgraph"
+)
+
 type TestConfig struct {
 	TypeOfTest string `yaml:"type_of_test"`
 
@@ -39,6 +56,7 @@ type TestConfig struct {
 	ITCFG ItterrationTestConfig `yaml:"ittest_config"`
 	PTCFG ParseTestConfig       `yaml:"parsetest_config"`
 	MTCFG MarkTestConfig 		`yaml:"marktest_config"`
+	ATCFG AdvTimeConfig			`yaml:"advtime_config"`
 }
 
 type GraphGeneratorConfig struct {
@@ -80,6 +98,18 @@ type MarkTestConfig struct{
 	PathToFile 			string `yaml:"path_to_file"`
 	DrawDiffGraphic		bool`yaml:"draw_diff_graphic"`
 	DrawDynGraphic		bool`yaml:"draw_dyn_graphic"`
+}
+
+type AdvTimeConfig struct{
+	EnableAdvTime			bool`yaml:"enable_adv_time"`
+	PathToFile       	string`yaml:"path_to_file"`
+	DrawDistribGraphic  bool`yaml:"draw_distribution_graphic"`
+	GraphicCFG          AdvGraphicConfig`yaml:"adv_graphic_config"`
+}
+
+type AdvGraphicConfig struct{
+	ColorSet 			[]string`yaml:"color_set"`
+	NameSet				[]string`yaml:"name_set"`
 }
 
 func readConfig(configName string) (*TestConfig, error) {
