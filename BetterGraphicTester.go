@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"time"
-	"io"
 	//"bufio"
 )
 
 //var PathToResultFile string = "ResultTab"
 
-var lo logger = logger{state:true}
+var lo logger = logger{state: true}
 
 func main() {
 	//reading config
@@ -22,48 +22,7 @@ func main() {
 		return
 	}
 
-	/*fmt.Println("enable adv time:",config.ATCFG.EnableAdvTime)
-	fmt.Println("enable draw graphic:",config.ATCFG.DrawDistribGraphic)
-	fmt.Print("Press 'Enter' to continue...")
-  	bufio.NewReader(os.Stdin).ReadBytes('\n')*/
-
-		
-
-	//create dir for result of graph handler
-	if err := createResDir(config); err != nil {
-		log.Println(err)
-		return
-	}
-
-	lo.log("res dir created")
-
-	//create dir for generated graphs
-	if err := createGraphDir(config); err != nil {
-		log.Println(err)
-		return
-	}
-
-	lo.log("graph dir created")
-
-	//create file for results
-	resFile, err := os.Create(PathToResultFile)
-	if err != nil {
-		fmt.Println(err)
-		resFile.Close()
-		return
-	}
-	resFile.Close()
-
-	lo.log("result file created")
-
-	//create file for results
-	advtimeFile, err := os.Create(PathToAdvTimeFile)
-	if err != nil {
-		fmt.Println(err)
-		advtimeFile.Close()
-		return
-	}
-	advtimeFile.Close()
+	initFilesAndDirs(config)
 
 	var prevTime time.Duration
 	var itterator int = 0
@@ -118,7 +77,7 @@ func main() {
 
 			lo.log("result coppied")
 
-			resString[5],err = getResult(config)
+			resString[5], err = getResult(config)
 			if err != nil {
 				log.Println(err)
 				return
@@ -142,35 +101,34 @@ func main() {
 
 			lo.log("time parsed")
 
-
 			//get string with mark
-			if config.MTCFG.WithFMMark{
+			if config.MTCFG.WithFMMark {
 				resString[6], err = getMark(config)
 				if err != nil {
 					log.Println(err)
 					return
-				}	
+				}
 				lo.log("mark parsed")
 			}
 
 			//get string with advtime if enable
-			if config.ATCFG.EnableAdvTime{
+			if config.ATCFG.EnableAdvTime {
 				advtime := ""
 				if config.TypeOfTest == EDGETEST {
 					advtime += strconv.Itoa(amE)
 				}
-				if config.TypeOfTest == VERTEXTEST{
+				if config.TypeOfTest == VERTEXTEST {
 					advtime += strconv.Itoa(amV)
 				}
-				tmp,err := getAdvancedTime(config)
-				if err != nil{
+				tmp, err := getAdvancedTime(config)
+				if err != nil {
 					log.Println(err)
 					return
 				}
 				advtime += " " + tmp[:(len(tmp)-1)]
 				lo.log("advtime parsed")
 
-				if err = AppendStringToFile(PathToAdvTimeFile,advtime,itterator);err != nil{
+				if err = AppendStringToFile(PathToAdvTimeFile, advtime, itterator); err != nil {
 					log.Println(err)
 					return
 				}
@@ -188,11 +146,9 @@ func main() {
 			if err = AppendStringToFile(PathToResultFile, writeRes, itterator); err != nil {
 				log.Println(err)
 				return
-			}		
+			}
 
 			lo.log("result added to file")
-
-
 
 		case config.TypeOfTest == ITTEST:
 			resString := make([]string, 5)
@@ -237,7 +193,6 @@ func main() {
 				log.Println(err)
 				return
 			}
-			
 
 			lo.log("result coppied")
 
@@ -253,26 +208,26 @@ func main() {
 			lo.log("result value getted")
 
 			//get string with mark
-			if config.MTCFG.WithFMMark{
+			if config.MTCFG.WithFMMark {
 				resString[5], err = getMark(config)
 				if err != nil {
 					log.Println(err)
 					return
-				}	
+				}
 				lo.log("mark parsed")
 			}
 
-						//get string with advtime if enable
-			if config.ATCFG.EnableAdvTime{
+			//get string with advtime if enable
+			if config.ATCFG.EnableAdvTime {
 				advtime := strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*itterator)
-				tmp,err := getAdvancedTime(config)
-				if err != nil{
+				tmp, err := getAdvancedTime(config)
+				if err != nil {
 					log.Println(err)
 					return
 				}
-				advtime +=  " " +  tmp[:(len(tmp)-1)]
+				advtime += " " + tmp[:(len(tmp)-1)]
 				lo.log("advtime parsed")
-				if err = AppendStringToFile(PathToAdvTimeFile,advtime,itterator);err != nil{
+				if err = AppendStringToFile(PathToAdvTimeFile, advtime, itterator); err != nil {
 					log.Println(err)
 					return
 				}
@@ -335,9 +290,9 @@ func main() {
 				if err != nil {
 					log.Println(err)
 					return
-				}	
+				}
 
-				if config.MTCFG.WithFMMark{
+				if config.MTCFG.WithFMMark {
 					lo.log("mark parsed")
 				}
 
@@ -389,7 +344,7 @@ func main() {
 			return
 		}
 
-		if config.MTCFG.DrawDiffGraphic{
+		if config.MTCFG.DrawDiffGraphic {
 			lo.log("draw diff graphic")
 			resFile.Seek(0, io.SeekStart)
 			err = DrawMarkDiff(resFile, config, itterator)
@@ -398,7 +353,7 @@ func main() {
 				return
 			}
 		}
-		if config.MTCFG.DrawDynGraphic{
+		if config.MTCFG.DrawDynGraphic {
 			resFile.Seek(0, io.SeekStart)
 			lo.log("draw progression graphic")
 			err = DrawMarkProgression(resFile, config, itterator)
@@ -409,15 +364,15 @@ func main() {
 		}
 
 		if config.ATCFG.DrawDistribGraphic {
-			advtimeFile,err := os.Open(PathToAdvTimeFile)
-			if err != nil{
+			advtimeFile, err := os.Open(PathToAdvTimeFile)
+			if err != nil {
 				log.Println(err)
 				return
 			}
 			defer advtimeFile.Close()
 			lo.log("draw distribution graphic")
-			err = DrawAdvtimeDistribution(advtimeFile,config,itterator)
-			if err != nil{
+			err = DrawAdvtimeDistribution(advtimeFile, config, itterator)
+			if err != nil {
 				log.Println(err)
 				return
 			}

@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"os"
-	"strconv"
+	//"strconv"
+	"bufio"
 	"io"
 )
 
@@ -21,7 +22,15 @@ func main() {
 	}
 	defer file.Close()
 
-	am, _ := strconv.Atoi(os.Args[2])
+	scanner := bufio.NewScanner(file)
+
+	am := 0
+	for scanner.Scan(){
+		am++
+	}
+
+	file.Seek(0,io.SeekStart)
+	//am, _ := strconv.Atoi(os.Args[2])
 	if err = DrawPlotCust(file, config, am); err != nil {
 		log.Println(err)
 	}

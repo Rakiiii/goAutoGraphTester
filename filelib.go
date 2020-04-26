@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	//"math"
 	"image/color"
 	"errors"
 	"fmt"
@@ -225,9 +226,14 @@ func DrawMarkDiff(file *os.File, conf *TestConfig, n int)error{
 					return nil, err
 				}
 				pts[itter].O = float64(res)
-				pts[itter].C = float64(num)
+				if num != 0{
+					pts[itter].C = float64(num)
+					pts[itter].H = float64(num)
+				}else{
+					pts[itter].C = float64(res)
+					pts[itter].H = float64(res)
+				}
 				pts[itter].L = float64(res)
-				pts[itter].H = float64(num)
 				itter++
 			}
 			return pts, scanner.Err()
@@ -329,7 +335,12 @@ func DrawMarkProgression(file *os.File, conf *TestConfig, n int)error{
 				if err != nil {
 					return nil, err
 				}
-				pts[itter].Y = float64(num - res)
+				sub := num - res
+				if sub >= 0{
+					pts[itter].Y = float64(sub)
+				}else{
+					pts[itter].Y = 0.0
+				}
 				itter++
 
 				
