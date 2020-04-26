@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 )
 
 var lo logger = logger{state: true}
@@ -20,309 +19,179 @@ func main() {
 	}
 
 	initFilesAndDirs(config)
+	condition := NewTestState(config)
 
-	var prevTime time.Duration
-	var itterator int = 0
-	timeFlag := true
-	itterationFlag := true
 	graphgeneFlag := true
 
-	for timeFlag && itterationFlag {
-		switch {
-		case config.TypeOfTest == EDGETEST || config.TypeOfTest == VERTEXTEST:
+	switch {
+	case config.TypeOfTest == EDGETEST || config.TypeOfTest == VERTEXTEST:
+		if condition, err = startDeffTest(config); err != nil {
+			log.Panic(err)
+		}
+	case config.TypeOfTest == ITTEST:
+		resString := make([]string, 5)
 
-			lo.log("start vertex of edges test")
+		resString[0] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*condition.Itterator())
 
-			resString := make([]string, 7)
-
-			amV, amE := countAmount(config, itterator)
-			resString[0] = strconv.Itoa(amV)
-			resString[1] = strconv.Itoa(amE)
-
-			log.Println("start graph generation")
-			//generate graph
-			if err := startGraphGene(config, itterator); err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("graph generated")
-
-			//copy generated graph and get name
-			resString[2], err = copyGraph(config, itterator)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("graph coppied")
-
-			//start graph handler
-			if err := startGraphHandler(config, itterator); err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("graph handler finnished")
-
-			//save result and get name
-			resString[3], err = saveGraphHandlerResult(config, itterator)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("result coppied")
-
-			resString[5], err = getResult(config)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("result add to tab")
-
-			//get string with time
-			resString[4], err = getTime(config)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			//get time
-			prevTime, err = time.ParseDuration(resString[4])
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("time parsed")
-
-			//get string with mark
-			if config.MTCFG.WithFMMark {
-				resString[6], err = getMark(config)
-				if err != nil {
+		if config.ITCFG.GraphGeneratorBefavor != "no" {
+			if graphgeneFlag {
+				//generate graph
+				if _, err := startGraphGene(config, condition.Itterator()); err != nil {
 					log.Println(err)
 					return
 				}
-				lo.log("mark parsed")
+				lo.log("graph generated")
 			}
+		}
 
-			//get string with advtime if enable
-			if config.ATCFG.EnableAdvTime {
-				advtime := ""
-				if config.TypeOfTest == EDGETEST {
-					advtime += strconv.Itoa(amE)
-				}
-				if config.TypeOfTest == VERTEXTEST {
-					advtime += strconv.Itoa(amV)
-				}
-				tmp, err := getAdvancedTime(config)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				advtime += " " + tmp[:(len(tmp)-1)]
-				lo.log("advtime parsed")
+		if config.ITCFG.GraphGeneratorBefavor == "once" {
+			graphgeneFlag = false
+		}
 
-				if err = AppendStringToFile(PathToAdvTimeFile, advtime, itterator); err != nil {
-					log.Println(err)
-					return
-				}
-				lo.log("advtime appended")
-			}
+		//copy generated graph and get name
+		resString[2], err = copyGraph(config, condition.Itterator())
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-			//make res string
-			writeRes := ""
-			for _, i := range resString {
-				writeRes += i
-				writeRes += " "
-			}
+		lo.log("graph coppied")
 
-			//write result string
-			if err = AppendStringToFile(PathToResultFile, writeRes, itterator); err != nil {
-				log.Println(err)
-				return
-			}
+		//start graph handler
+		if err := startGraphHandler(config, condition.Itterator()); err != nil {
+			log.Println(err)
+			return
+		}
 
-			lo.log("result added to file")
+		lo.log("graph handler finnished")
 
-		case config.TypeOfTest == ITTEST:
-			resString := make([]string, 5)
+		//save result and get name
+		resString[3], err = saveGraphHandlerResult(config, condition.Itterator())
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-			resString[0] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*itterator)
+		lo.log("result coppied")
 
-			if config.ITCFG.GraphGeneratorBefavor != "no" {
-				if graphgeneFlag {
-					//generate graph
-					if err := startGraphGene(config, itterator); err != nil {
-						log.Println(err)
-						return
-					}
-					lo.log("graph generated")
-				}
-			}
+		lo.log("result add to tab")
 
-			if config.ITCFG.GraphGeneratorBefavor == "once" {
-				graphgeneFlag = false
-			}
+		//get result value
+		resString[1], err = getResult(config)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-			//copy generated graph and get name
-			resString[2], err = copyGraph(config, itterator)
+		lo.log("result value getted")
+
+		//get string with mark
+		if config.MTCFG.WithFMMark {
+			resString[5], err = getMark(config)
 			if err != nil {
 				log.Println(err)
 				return
 			}
+			lo.log("mark parsed")
+		}
 
-			lo.log("graph coppied")
-
-			//start graph handler
-			if err := startGraphHandler(config, itterator); err != nil {
-				log.Println(err)
-				return
-			}
-
-			lo.log("graph handler finnished")
-
-			//save result and get name
-			resString[3], err = saveGraphHandlerResult(config, itterator)
+		//get string with advtime if enable
+		if config.ATCFG.EnableAdvTime {
+			advtime := strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*condition.Itterator())
+			tmp, err := getAdvancedTime(config)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-
-			lo.log("result coppied")
-
-			lo.log("result add to tab")
-
-			//get result value
-			resString[1], err = getResult(config)
-			if err != nil {
+			advtime += " " + tmp[:(len(tmp)-1)]
+			lo.log("advtime parsed")
+			if err = AppendStringToFile(PathToAdvTimeFile, advtime, condition.Itterator()); err != nil {
 				log.Println(err)
 				return
 			}
+			lo.log("advtime appended")
+		}
 
-			lo.log("result value getted")
+		//make res string
+		writeRes := ""
+		for _, i := range resString {
+			writeRes += i
+			writeRes += " "
+		}
 
-			//get string with mark
-			if config.MTCFG.WithFMMark {
-				resString[5], err = getMark(config)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				lo.log("mark parsed")
-			}
+		//write result string
+		if err = AppendStringToFile(PathToResultFile, writeRes, condition.Itterator()); err != nil {
+			log.Println(err)
+			return
+		}
+	case config.TypeOfTest == PARSETEST:
 
-			//get string with advtime if enable
-			if config.ATCFG.EnableAdvTime {
-				advtime := strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*itterator)
-				tmp, err := getAdvancedTime(config)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				advtime += " " + tmp[:(len(tmp)-1)]
-				lo.log("advtime parsed")
-				if err = AppendStringToFile(PathToAdvTimeFile, advtime, itterator); err != nil {
-					log.Println(err)
-					return
-				}
-				lo.log("advtime appended")
-			}
+		resString := make([]string, 2)
 
-			//make res string
-			writeRes := ""
-			for _, i := range resString {
-				writeRes += i
-				writeRes += " "
-			}
+		setOfGraphs, err := getSliceOfGrpahs(config)
+		if err != nil {
+			log.Panicln(err)
+			return
+		}
 
-			//write result string
-			if err = AppendStringToFile(PathToResultFile, writeRes, itterator); err != nil {
-				log.Println(err)
-				return
-			}
-		case config.TypeOfTest == PARSETEST:
+		log.Println("set of grpahs parsed")
 
-			resString := make([]string, 2)
-
-			setOfGraphs, err := getSliceOfGrpahs(config)
-			if err != nil {
+		for it, graphFile := range *setOfGraphs {
+			log.Println("grpah handling starts , grpah name:", graphFile)
+			config.PTCFG.File = graphFile
+			if err := startGraphHandler(config, it); err != nil {
 				log.Panicln(err)
 				return
 			}
 
-			log.Println("set of grpahs parsed")
+			lo.log("graph handler finnished")
 
-			for it, graphFile := range *setOfGraphs {
-				log.Println("grpah handling starts , grpah name:", graphFile)
-				config.PTCFG.File = graphFile
-				if err := startGraphHandler(config, it); err != nil {
-					log.Panicln(err)
-					return
-				}
-
-				lo.log("graph handler finnished")
-
-				//save result and get name
-				resString[0], err = saveGraphHandlerResult(config, itterator)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-
-				lo.log("result coppied")
-
-				//get result value
-				resString[1], err = getResultFromParsed(config)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				lo.log("result value getted")
-
-				//get string with mark
-				resString[5], err = getMark(config)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-
-				if config.MTCFG.WithFMMark {
-					lo.log("mark parsed")
-				}
-
-				//make res string
-				writeRes := ""
-				for _, i := range resString {
-					writeRes += i
-					writeRes += " "
-				}
-
-				//write result string
-				if err = AppendStringToFile(PathToResultFile, writeRes, itterator); err != nil {
-					log.Println(err)
-					return
-				}
-
+			//save result and get name
+			resString[0], err = saveGraphHandlerResult(config, condition.Itterator())
+			if err != nil {
+				log.Println(err)
+				return
 			}
 
-		default:
-			log.Panicln("Wrong type of test")
-			return
+			lo.log("result coppied")
+
+			//get result value
+			resString[1], err = getResultFromParsed(config)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			lo.log("result value getted")
+
+			//get string with mark
+			resString[5], err = getMark(config)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			if config.MTCFG.WithFMMark {
+				lo.log("mark parsed")
+			}
+
+			//make res string
+			writeRes := ""
+			for _, i := range resString {
+				writeRes += i
+				writeRes += " "
+			}
+
+			//write result string
+			if err = AppendStringToFile(PathToResultFile, writeRes, condition.Itterator()); err != nil {
+				log.Println(err)
+				return
+			}
+
 		}
 
-		//stop condition
-		if (config.TypeOfStopCondition == TIMESTOP || config.TypeOfStopCondition == MIXEDSTOP) && prevTime.Milliseconds() > config.MaxTimeForItteration {
-			timeFlag = false
-		}
-
-		if (config.TypeOfStopCondition == ITSTOP || config.TypeOfStopCondition == MIXEDSTOP) && config.AmountOfItterations <= itterator {
-			itterationFlag = false
-		}
-
-		itterator++
+	default:
+		log.Panicln("Wrong type of test")
+		return
 	}
 
 	if config.TypeOfTest != PARSETEST {
@@ -335,7 +204,7 @@ func main() {
 		defer resFile.Close()
 
 		//draw graphic
-		err = DrawPlotCust(resFile, config, itterator)
+		err = DrawPlotCust(resFile, config, condition.Itterator())
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -344,7 +213,7 @@ func main() {
 		if config.MTCFG.DrawDiffGraphic {
 			lo.log("draw diff graphic")
 			resFile.Seek(0, io.SeekStart)
-			err = DrawMarkDiff(resFile, config, itterator)
+			err = DrawMarkDiff(resFile, config, condition.Itterator())
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -353,7 +222,7 @@ func main() {
 		if config.MTCFG.DrawDynGraphic {
 			resFile.Seek(0, io.SeekStart)
 			lo.log("draw progression graphic")
-			err = DrawMarkProgression(resFile, config, itterator)
+			err = DrawMarkProgression(resFile, config, condition.Itterator())
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -368,7 +237,7 @@ func main() {
 			}
 			defer advtimeFile.Close()
 			lo.log("draw distribution graphic")
-			err = DrawAdvtimeDistribution(advtimeFile, config, itterator)
+			err = DrawAdvtimeDistribution(advtimeFile, config, condition.Itterator())
 			if err != nil {
 				log.Println(err)
 				return

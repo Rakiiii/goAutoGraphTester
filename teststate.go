@@ -29,6 +29,7 @@ func (t *TestState) Itterator() int {
 }
 
 func (t *TestState) isContinue(tm time.Duration, edg int, vertex int) bool {
+	t.itterator++
 	switch t.testcond {
 	case TIMESTOP:
 		return tm.Milliseconds() < t.maxTime

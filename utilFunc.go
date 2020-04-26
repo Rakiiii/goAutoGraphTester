@@ -14,11 +14,20 @@ import (
 )
 
 const (
-	DEFFRESDIR = "GraphResult"
-	DEFFGRPAHDIR = "GeneratedGraphs"
+	DEFFRESDIR    = "GraphResult"
+	DEFFGRPAHDIR  = "GeneratedGraphs"
 	DEFFGRAPHNAME = "/graph_"
-	DEFFRESNAME = "/ResultedGraph_"
+	DEFFRESNAME   = "/ResultedGraph_"
 )
+
+type graphSize struct {
+	AV int
+	AE int
+}
+
+func NewGraphSize() *graphSize {
+	return &graphSize{AV: 0, AE: 0}
+}
 
 type logger struct {
 	state bool
@@ -80,9 +89,12 @@ func countAmount(config *TestConfig, it int) (int, int) {
 	return config.StartingAmountOfVertex + it*config.VertexDifferens, config.StartingAmountOfEdges + it*config.EdgesDifferens
 }
 
-func startGraphGene(config *TestConfig, it int) error {
+func startGraphGene(config *TestConfig, it int) (graphSize, error) {
 	//count amount of vertex and edges on itteration
 	amountOfVertex, amountOfEdges := countAmount(config, it)
+	size := *NewGraphSize()
+	size.AV = amountOfVertex
+	size.AE = amountOfEdges
 
 	//generate configs
 	flags := *parseFlags(&config.GGCFG.GraphGeneratorFlags, amountOfVertex, amountOfEdges, it, config, config.PTCFG.File)
@@ -106,18 +118,18 @@ func startGraphGene(config *TestConfig, it int) error {
 		var err error
 		stdout, err = graphgene.StdoutPipe()
 		if err != nil {
-			return err
+			return size, err
 		}
 	}
 
 	stderr, err := graphgene.StderrPipe()
 	if err != nil {
-		return err
+		return size, err
 	}
 
 	if err := graphgene.Run(); err != nil {
 		log.Println(flags)
-		return err
+		return size, err
 	}
 
 	errout, _ := ioutil.ReadAll(stderr)
@@ -132,7 +144,7 @@ func startGraphGene(config *TestConfig, it int) error {
 		}
 	}
 
-	return nil
+	return size, nil
 }
 
 //returning name of copy file and error or nil
@@ -197,7 +209,6 @@ func startGraphHandler(config *TestConfig, it int) error {
 
 	lo.log("stderr start")
 	graphhandler.Stderr = os.Stderr
-
 
 	lo.log("handler started with out vm")
 	if err := graphhandler.Run(); err != nil {
@@ -305,7 +316,7 @@ func parseFlags(pars *[]string, amountOfVertex, amountOfEdges, it int, config *T
 		if flag == GRAPHPATHFLAG {
 			flags[i] = config.GraphPath
 		}
-		if flag == ITFLAG{
+		if flag == ITFLAG {
 			flags[i] = strconv.Itoa(config.ITCFG.StartingAmountOfItteration + config.ITCFG.ItterrationDifference*it)
 		}
 		if flag == PARSEGRAPHFLAG {
@@ -323,15 +334,15 @@ func getSliceOfGrpahs(config *TestConfig) (*[]string, error) {
 	return &res, nil
 }
 
-func getMark(config *TestConfig)(string,error){
-	if config.MTCFG.WithFMMark{
+func getMark(config *TestConfig) (string, error) {
+	if config.MTCFG.WithFMMark {
 		//open file to read duration of gh work
 		markFile, err := os.Open(config.MTCFG.PathToFile)
 		if err != nil {
 			return "", err
 		}
 		defer markFile.Close()
-	
+
 		//read duration
 		scanner := bufio.NewScanner(markFile)
 		scanner.Scan()
@@ -340,26 +351,26 @@ func getMark(config *TestConfig)(string,error){
 		} else {
 			return scanner.Text(), nil
 		}
-	}else{
-		return "",nil
+	} else {
+		return "", nil
 	}
 }
 
-func getAdvancedTime(config *TestConfig)(string,error){
-	if config.ATCFG.EnableAdvTime{
-		advtimeFile,err := os.Open(config.ATCFG.PathToFile)
-		if err != nil{
-			return "",err
+func getAdvancedTime(config *TestConfig) (string, error) {
+	if config.ATCFG.EnableAdvTime {
+		advtimeFile, err := os.Open(config.ATCFG.PathToFile)
+		if err != nil {
+			return "", err
 		}
 		defer advtimeFile.Close()
-		
+
 		res := ""
 		scanner := bufio.NewScanner(advtimeFile)
-		for scanner.Scan(){
+		for scanner.Scan() {
 			res += scanner.Text() + "\n"
 		}
-		return res,nil
-	}else{
-		return "",nil
+		return res, nil
+	} else {
+		return "", nil
 	}
 }

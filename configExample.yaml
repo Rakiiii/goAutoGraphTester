@@ -27,6 +27,9 @@ starting_amount_of_vertex: 5
 #could be negative( if you wanna back step ) or positive int 
 vertex_differens: 1
 
+#if stop condition is vertex stop it will be max amount of vertex
+max_amount_of_vertex:
+
 #Amount of vertex on step number <it> will be counted as <starting_amount_of_vertex> + <it>*<vertex_differens> 
 
 #amount of edges wich you wanna have on first itteration can be only possitive integer  
@@ -36,6 +39,9 @@ starting_amount_of_edges: 8
 #amount of edges on iterration with number <itterationNumber>  = starting_amount_of_edges + edges_differens * itterationNumber
 #could be negative( if you wanna back step ) or positive int 
 edges_differens: 0
+
+#if stop condition is edges stop it will be max amount of edges
+max_amount_of_edges:
 
 #Amount of edges on step number <it> will be counted as <starting_amount_of_edges> + <it>*<edges_differrens>
 
