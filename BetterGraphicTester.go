@@ -7,10 +7,7 @@ import (
 	"os"
 	"strconv"
 	"time"
-	//"bufio"
 )
-
-//var PathToResultFile string = "ResultTab"
 
 var lo logger = logger{state: true}
 
@@ -330,7 +327,7 @@ func main() {
 
 	if config.TypeOfTest != PARSETEST {
 		//open file with results
-		resFile, err = os.Open(PathToResultFile)
+		resFile, err := os.Open(PathToResultFile)
 		if err != nil {
 			log.Println(err)
 			return

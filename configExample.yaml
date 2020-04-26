@@ -44,6 +44,8 @@ edges_differens: 0
 #"timestop" means that it wouldn't start new itteration of graphgene and grpahhandler ,if on preveous itteration time of graphhandler work
 # was more then <max_time_for_itteration>
 #"itstop" means fixed amount of itteration equls to <amount_of_itterations>
+#"edgstop" means that test will be stoped after setted amount of edges are achived <WIP>
+#"vertexstop" means that test will be stopped after setted amount of vertex are achived <WIP>
 #"mixed" means that it will be stoped by first true condition of "timestop" and "itstop" 
 type_of_stop_condition: itstop
 

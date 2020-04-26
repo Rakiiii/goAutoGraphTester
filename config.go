@@ -8,20 +8,22 @@ import (
 )
 
 const (
-	PathToResultFile = "ResultTab"
+	PathToResultFile  = "ResultTab"
 	PathToAdvTimeFile = "AdvTimeTab"
-	EDGETEST = "edgestest"
-	VERTEXTEST = "vertextest"
-	ITTEST = "ittest"
-	PARSETEST = "parsetest"
-	TIMESTOP = "timestop"
-	ITSTOP = "itstop"
-	MIXEDSTOP = "mixed"
-	VERTEXFLAG = "Avertex"
-	EDGEFLAG = "Aedges"
-	GRAPHPATHFLAG = "GraphPath"
-	ITFLAG =  "it" 
-	PARSEGRAPHFLAG = "pgraph"
+	EDGETEST          = "edgestest"
+	VERTEXTEST        = "vertextest"
+	ITTEST            = "ittest"
+	PARSETEST         = "parsetest"
+	TIMESTOP          = "timestop"
+	ITSTOP            = "itstop"
+	EDGSTOP           = "edgstop"
+	VERTEXSTOP        = "vertexstop"
+	MIXEDSTOP         = "mixed"
+	VERTEXFLAG        = "Avertex"
+	EDGEFLAG          = "Aedges"
+	GRAPHPATHFLAG     = "GraphPath"
+	ITFLAG            = "it"
+	PARSEGRAPHFLAG    = "pgraph"
 )
 
 type TestConfig struct {
@@ -55,8 +57,8 @@ type TestConfig struct {
 	GHCFG GraphHandlerConfig    `yaml:"graphhandler_config"`
 	ITCFG ItterrationTestConfig `yaml:"ittest_config"`
 	PTCFG ParseTestConfig       `yaml:"parsetest_config"`
-	MTCFG MarkTestConfig 		`yaml:"marktest_config"`
-	ATCFG AdvTimeConfig			`yaml:"advtime_config"`
+	MTCFG MarkTestConfig        `yaml:"marktest_config"`
+	ATCFG AdvTimeConfig         `yaml:"advtime_config"`
 }
 
 type GraphGeneratorConfig struct {
@@ -93,23 +95,23 @@ type ParseTestConfig struct {
 	File                 string
 }
 
-type MarkTestConfig struct{
-	WithFMMark			bool`yaml:"contains_mark"`
-	PathToFile 			string `yaml:"path_to_file"`
-	DrawDiffGraphic		bool`yaml:"draw_diff_graphic"`
-	DrawDynGraphic		bool`yaml:"draw_dyn_graphic"`
+type MarkTestConfig struct {
+	WithFMMark      bool   `yaml:"contains_mark"`
+	PathToFile      string `yaml:"path_to_file"`
+	DrawDiffGraphic bool   `yaml:"draw_diff_graphic"`
+	DrawDynGraphic  bool   `yaml:"draw_dyn_graphic"`
 }
 
-type AdvTimeConfig struct{
-	EnableAdvTime			bool`yaml:"enable_adv_time"`
-	PathToFile       	string`yaml:"path_to_file"`
-	DrawDistribGraphic  bool`yaml:"draw_distribution_graphic"`
-	GraphicCFG          AdvGraphicConfig`yaml:"adv_graphic_config"`
+type AdvTimeConfig struct {
+	EnableAdvTime      bool             `yaml:"enable_adv_time"`
+	PathToFile         string           `yaml:"path_to_file"`
+	DrawDistribGraphic bool             `yaml:"draw_distribution_graphic"`
+	GraphicCFG         AdvGraphicConfig `yaml:"adv_graphic_config"`
 }
 
-type AdvGraphicConfig struct{
-	ColorSet 			[]string`yaml:"color_set"`
-	NameSet				[]string`yaml:"name_set"`
+type AdvGraphicConfig struct {
+	ColorSet []string `yaml:"color_set"`
+	NameSet  []string `yaml:"name_set"`
 }
 
 func readConfig(configName string) (*TestConfig, error) {
