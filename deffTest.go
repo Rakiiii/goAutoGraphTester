@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -99,10 +100,18 @@ func startDeffTest(config *TestConfig) (*TestState, error) {
 			advtime += " " + tmp[:(len(tmp)-1)]
 			lo.log("advtime parsed")
 
+			if err = advtimewriter.Write(strings.Fields(advtime)); err != nil {
+				return nil, err
+			}
+
 			if err = AppendStringToFile(PathToAdvTimeFile, advtime, condition.Itterator()); err != nil {
 				return nil, err
 			}
 			lo.log("advtime appended")
+		}
+
+		if err := resultwriter.Write(resString); err != nil {
+			return nil, err
 		}
 
 		//make res string

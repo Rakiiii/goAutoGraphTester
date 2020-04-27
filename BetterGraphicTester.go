@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"os"
 )
@@ -18,6 +16,10 @@ func main() {
 	}
 
 	initFilesAndDirs(config)
+	//initWriters()
+	initAdvTimeNames(config)
+	initResultNames(config)
+
 	condition := NewTestState(config)
 
 	switch {
@@ -38,54 +40,11 @@ func main() {
 		return
 	}
 
+	flushWriters()
+
 	if config.TypeOfTest != PARSETEST {
-		//open file with results
-		resFile, err := os.Open(PathToResultFile)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		defer resFile.Close()
-
-		//draw graphic
-		err = DrawPlotCust(resFile, config, condition.Itterator())
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		if config.MTCFG.DrawDiffGraphic {
-			lo.log("draw diff graphic")
-			resFile.Seek(0, io.SeekStart)
-			err = DrawMarkDiff(resFile, config, condition.Itterator())
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-		}
-		if config.MTCFG.DrawDynGraphic {
-			resFile.Seek(0, io.SeekStart)
-			lo.log("draw progression graphic")
-			err = DrawMarkProgression(resFile, config, condition.Itterator())
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-		}
-
-		if config.ATCFG.DrawDistribGraphic {
-			advtimeFile, err := os.Open(PathToAdvTimeFile)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			defer advtimeFile.Close()
-			lo.log("draw distribution graphic")
-			err = DrawAdvtimeDistribution(advtimeFile, config, condition.Itterator())
-			if err != nil {
-				log.Println(err)
-				return
-			}
+		if err = drawGraphics(config, condition); err != nil {
+			log.Panic(err)
 		}
 	}
 }

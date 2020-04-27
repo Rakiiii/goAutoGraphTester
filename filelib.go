@@ -55,6 +55,25 @@ func Copy(src, dst string) error {
 	return out.Close()
 }
 
+func addToAdvTime(line []string) error {
+	if err := advtimewriter.Write(line); err != nil {
+		return err
+	}
+	return nil
+}
+
+func addToResult(line []string) error {
+	if err := resultwriter.Write(line); err != nil {
+		return err
+	}
+	return nil
+}
+
+func flushWriters() {
+	advtimewriter.Flush()
+	resultwriter.Flush()
+}
+
 func AppendStringToFile(path, text string, it int) error {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
