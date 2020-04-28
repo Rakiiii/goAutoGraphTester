@@ -56,18 +56,22 @@ func startParseTest(config *TestConfig) (*TestState, error) {
 			lo.log("mark parsed")
 		}
 
-		//make res string
-		writeRes := ""
-		for _, i := range resString {
-			writeRes += i
-			writeRes += " "
-		}
-
-		//write result string
-		if err = AppendStringToFile(PathToResultFile, writeRes, condition.Itterator()); err != nil {
+		if err = resultwriter.Write(resString); err != nil {
 			return nil, err
 		}
+		/*
+			//make res string
+			writeRes := ""
+			for _, i := range resString {
+				writeRes += i
+				writeRes += " "
+			}
 
+			//write result string
+			if err = AppendStringToFile(PathToResultFile, writeRes, condition.Itterator()); err != nil {
+				return nil, err
+			}
+		*/
 	}
 
 	return condition, nil

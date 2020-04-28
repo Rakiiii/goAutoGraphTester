@@ -16,6 +16,7 @@ const (
 	VERTEXTEST           = "vertextest"
 	ITTEST               = "ittest"
 	PARSETEST            = "parsetest"
+	CMPTEST              = "cmptest"
 	TIMESTOP             = "timestop"
 	ITSTOP               = "itstop"
 	EDGSTOP              = "edgstop"
@@ -116,6 +117,47 @@ type AdvTimeConfig struct {
 type AdvGraphicConfig struct {
 	ColorSet []string `yaml:"color_set"`
 	NameSet  []string `yaml:"name_set"`
+}
+
+type ExtraGraphicCfg struct {
+	//name of file with result graphic
+	Name string
+	//must be csv file
+	PathToSoures string
+	//name of fileds from csv which will be used for graphic draw
+	//for "line" first one is X cord second is y cord
+	//for "candels" is represented by TOHLCV  [ first is T, second is O and so on]
+	//"multybars" is represented by set of bars stacked on each other [ firstone is x axis value,second is first part of bar,third is second part of bar and so on]
+	NameFilds []string
+	//Extra operation, must looks like [[operation1 nameOfOperand1 nameOfOperand2],[operation2 nameOfOperand1 nameOfOperand2]] to use result in graphic
+	//must right "!oper1" to NameFields,
+	//Possibel operations sub,plus,div,time
+	Operation []string
+	//Type of graphic chich will be drawen:"line","candels","multybars"
+	//for "multybars" CFG must be non nil
+	Type string
+	//label of x asix
+	XAsixLabel string
+	//label of y asix
+	YAsixLabel string
+	//label of z asix
+	GraphicLabel string
+	//must contains name for legend and color set
+	//for "candels" first color is upper color, second is lower color
+	CFG AdvGraphicConfig
+	//string that contains 2 words with space : first : "top" or "bottom" second : "left" or "right"
+	//default top,left
+	LegendPosition string
+	//true if need to add legend
+	DoLegend bool
+
+	//some extra falgs, must be separate with spaces
+	//if "nonzero" setted and candels flag than if C or H is zero then they will be setted the same way as O and L
+	//if "positive" setted and line then x or y cord negative values would be setted as 0.0
+	//if "inv" setted and candels flag than colors moved between upped and lowwer
+	//if "nonzero" setted and "multybars" than must look "nonzero=[some number]" it will be YMin
+	//if "length" setted and "multybars" than must look like "length=[some number]"[it will be vg.Length()]
+	Flag string
 }
 
 func readConfig(configName string) (*TestConfig, error) {

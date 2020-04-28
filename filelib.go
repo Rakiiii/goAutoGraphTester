@@ -1,22 +1,10 @@
 package main
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
 	"image/color"
 	"io"
 	"os"
-	"strconv"
-	"strings"
-
-	"gonum.org/v1/plot"
-	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/plotutil"
-	"gonum.org/v1/plot/vg"
-
-	mbplotter "github.com/Rakiiii/goMultiBarPlotter"
-	csplotter "github.com/pplcc/plotext/custplotter"
 )
 
 const (
@@ -74,6 +62,7 @@ func flushWriters() {
 	resultwriter.Flush()
 }
 
+/*
 func AppendStringToFile(path, text string, it int) error {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
@@ -91,6 +80,7 @@ func AppendStringToFile(path, text string, it int) error {
 	}
 	return nil
 }
+
 
 func DrawPlotCust(file *os.File, conf *TestConfig, n int) error {
 	var getPoints func() (plotter.XYs, error)
@@ -491,7 +481,7 @@ func DrawAdvtimeDistribution(file *os.File, config *TestConfig, n int) error {
 	} else {
 		return nil
 	}
-}
+}*/
 
 func ParseHexColor(s string) (c color.RGBA, err error) {
 	c.A = 0xff

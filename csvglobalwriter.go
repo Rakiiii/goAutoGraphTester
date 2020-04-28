@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"log"
 	"os"
 )
@@ -30,7 +29,6 @@ func NewCustWriter(path string) *custWriter {
 }
 
 func (c *custWriter) Write(line []string) error {
-	fmt.Println(line)
 	return c.writer.Write(line)
 }
 
