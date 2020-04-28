@@ -34,7 +34,7 @@ func startItterationTest(config *TestConfig) (*TestState, error) {
 		}
 
 		//copy generated graph and get name
-		resString[2], err = copyGraph(config, condition.Itterator())
+		resString[1], err = copyGraph(config, condition.Itterator())
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func startItterationTest(config *TestConfig) (*TestState, error) {
 		lo.log("graph handler finnished")
 
 		//save result and get name
-		resString[3], err = saveGraphHandlerResult(config, condition.Itterator())
+		resString[2], err = saveGraphHandlerResult(config, condition.Itterator())
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +59,7 @@ func startItterationTest(config *TestConfig) (*TestState, error) {
 		lo.log("result add to tab")
 
 		//get result value
-		resString[1], err = getResult(config)
+		resString[3], err = getResult(config)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func startItterationTest(config *TestConfig) (*TestState, error) {
 
 		//get string with mark
 		if config.MTCFG.WithFMMark {
-			resString[5], err = getMark(config)
+			resString[4], err = getMark(config)
 			if err != nil {
 				return nil, err
 			}
@@ -89,29 +89,12 @@ func startItterationTest(config *TestConfig) (*TestState, error) {
 				return nil, err
 			}
 
-			/*if err = AppendStringToFile(PathToAdvTimeFile, advtime, condition.Itterator()); err != nil {
-				return nil, err
-			}*/
 			lo.log("advtime appended")
 		}
 
 		if err := resultwriter.Write(resString); err != nil {
 			return nil, err
 		}
-
-		/*
-			//make res string
-			writeRes := ""
-			for _, i := range resString {
-				writeRes += i
-				writeRes += " "
-			}
-
-			//write result string
-			if err = AppendStringToFile(PathToResultFile, writeRes, condition.Itterator()); err != nil {
-				return nil, err
-			}
-		*/
 	}
 
 	return condition, nil

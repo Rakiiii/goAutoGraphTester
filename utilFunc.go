@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -86,6 +87,10 @@ func createGraphDir(config *TestConfig) error {
 }
 
 func countAmount(config *TestConfig, it int) (int, int) {
+	if config.RndEdges {
+		maxedg := ((config.StartingAmountOfVertex + it*config.VertexDifferens) * (config.StartingAmountOfVertex + it*config.VertexDifferens - 1)) / 2
+		return config.StartingAmountOfVertex + it*config.VertexDifferens, rand.Intn(maxedg)
+	}
 	return config.StartingAmountOfVertex + it*config.VertexDifferens, config.StartingAmountOfEdges + it*config.EdgesDifferens
 }
 

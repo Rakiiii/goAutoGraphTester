@@ -40,9 +40,10 @@ type TestConfig struct {
 	VertexDifferens        int `yaml:"vertex_differens"`
 	MaxAmountOfVertex      int `yaml:max_amount_of_vertex`
 
-	StartingAmountOfEdges int `yaml:"starting_amount_of_edges"`
-	EdgesDifferens        int `yaml:"edges_differens"`
-	MaxAmountOfEdges      int `yaml:max_amount_of_edges`
+	StartingAmountOfEdges int  `yaml:"starting_amount_of_edges"`
+	EdgesDifferens        int  `yaml:"edges_differens"`
+	RndEdges              bool `yaml:rnd_edges`
+	MaxAmountOfEdges      int  `yaml:max_amount_of_edges`
 
 	TypeOfStopCondition  string `yaml:"type_of_stop_condition"`
 	MaxTimeForItteration int64  `yaml:"max_time_for_itteration"`

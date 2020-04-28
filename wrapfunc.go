@@ -90,7 +90,7 @@ func initStdGraphics(config *TestConfig) []ExtraGraphicCfg {
 		config.GraphicSet = append([]ExtraGraphicCfg{*initMarkProgressionGraphic(config)}, config.GraphicSet...)
 	}
 
-	if config.ATCFG.DrawDistribGraphic {
+	if config.ATCFG.DrawDistribGraphic && config.ATCFG.EnableAdvTime {
 		config.GraphicSet = append([]ExtraGraphicCfg{*initAdvTimeGraphic(config)}, config.GraphicSet...)
 	}
 

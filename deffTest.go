@@ -104,29 +104,12 @@ func startDeffTest(config *TestConfig) (*TestState, error) {
 				return nil, err
 			}
 
-			/*if err = AppendStringToFile(PathToAdvTimeFile, advtime, condition.Itterator()); err != nil {
-				return nil, err
-			}*/
 			lo.log("advtime appended")
 		}
 
 		if err := resultwriter.Write(resString); err != nil {
 			return nil, err
 		}
-
-		/*
-			//make res string
-			writeRes := ""
-			for _, i := range resString {
-				writeRes += i
-				writeRes += " "
-			}
-
-			//write result string
-			if err = AppendStringToFile(PathToResultFile, writeRes, condition.Itterator()); err != nil {
-				return nil, err
-			}
-		*/
 
 		lo.log("result added to file")
 	}

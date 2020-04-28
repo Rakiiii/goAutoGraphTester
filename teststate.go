@@ -18,8 +18,8 @@ func NewTestState(config *TestConfig) *TestState {
 	return &TestState{itterator: -1,
 		maxItter:  config.AmountOfItterations,
 		maxTime:   config.MaxTimeForItteration,
-		edgesMax:  -1,
-		vertexMax: -1,
+		edgesMax:  config.MaxAmountOfEdges,
+		vertexMax: config.MaxAmountOfVertex,
 		testcond:  config.TypeOfStopCondition,
 	}
 }
