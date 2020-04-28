@@ -63,25 +63,6 @@ func initFilesAndDirs(config *TestConfig) {
 	lo.log("graph dir created")
 
 	//create file for results
-	/*
-		resFile, err := os.Create(PathToResultFile)
-		if err != nil {
-			resFile.Close()
-			log.Panic(err)
-		}
-		resFile.Close()
-
-		lo.log("result file created")
-
-		//create file for results
-		advtimeFile, err := os.Create(PathToAdvTimeFile)
-		if err != nil {
-			advtimeFile.Close()
-			log.Panic(err)
-		}
-		advtimeFile.Close()
-	*/
-	//create file for results
 	resFileCsv, err := os.Create(PathToResultFileCsv)
 	if err != nil {
 		resFileCsv.Close()
@@ -100,75 +81,31 @@ func initFilesAndDirs(config *TestConfig) {
 	advtimewriter = NewCustWriterF(advtimeFileCsv)
 }
 
-func initWriters() {
-	advtimewriter = NewCustWriter(PathToAdvTimeFileCsv)
-	resultwriter = NewCustWriter(PathToResultFileCsv)
+func initStdGraphics(config *TestConfig) []ExtraGraphicCfg {
+	if config.MTCFG.DrawDiffGraphic {
+		config.GraphicSet = append([]ExtraGraphicCfg{*initCandelGraphic(config)}, config.GraphicSet...)
+
+	}
+	if config.MTCFG.DrawDynGraphic {
+		config.GraphicSet = append([]ExtraGraphicCfg{*initMarkProgressionGraphic(config)}, config.GraphicSet...)
+	}
+
+	if config.ATCFG.DrawDistribGraphic {
+		config.GraphicSet = append([]ExtraGraphicCfg{*initAdvTimeGraphic(config)}, config.GraphicSet...)
+	}
+
+	config.GraphicSet = append([]ExtraGraphicCfg{*initMainGraphic(config)}, config.GraphicSet...)
+	return config.GraphicSet
 }
 
 func drawGraphics(config *TestConfig, condition *TestState) error {
-	cfg := initMainGraphic(config)
-	if err := drawGraphic(cfg); err != nil {
-		return nil
-	}
+	lo.log("Start drawing graphics")
+	for _, cfg := range config.GraphicSet {
 
-	cndcfg := initCandelGraphic(config)
-	if err := drawGraphic(cndcfg); err != nil {
-		return nil
-	}
-
-	dercfg := initMarkProgressionGraphic(config)
-	if err := drawGraphic(dercfg); err != nil {
-		return nil
-	}
-
-	advcfg := initAdvTimeGraphic(config)
-	if err := drawGraphic(advcfg); err != nil {
-		return err
-	}
-
-	/*
-		//open file with results
-		resFile, err := os.Open(PathToResultFile)
-		if err != nil {
+		if err := drawGraphic(&cfg); err != nil {
 			return err
 		}
-		defer resFile.Close()
-
-		//draw graphic
-		err = DrawPlotCust(resFile, config, condition.Itterator())
-		if err != nil {
-			return err
-		}
-
-		if config.MTCFG.DrawDiffGraphic {
-			lo.log("draw diff graphic")
-			resFile.Seek(0, io.SeekStart)
-			err = DrawMarkDiff(resFile, config, condition.Itterator())
-			if err != nil {
-				return err
-			}
-		}
-		if config.MTCFG.DrawDynGraphic {
-			resFile.Seek(0, io.SeekStart)
-			lo.log("draw progression graphic")
-			err = DrawMarkProgression(resFile, config, condition.Itterator())
-			if err != nil {
-				return err
-			}
-		}
-
-		if config.ATCFG.DrawDistribGraphic {
-			advtimeFile, err := os.Open(PathToAdvTimeFile)
-			if err != nil {
-				return err
-			}
-			defer advtimeFile.Close()
-			lo.log("draw distribution graphic")
-			err = DrawAdvtimeDistribution(advtimeFile, config, condition.Itterator())
-			if err != nil {
-				return err
-			}
-		}*/
+	}
 
 	return nil
 }

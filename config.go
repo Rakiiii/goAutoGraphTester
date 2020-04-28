@@ -64,6 +64,8 @@ type TestConfig struct {
 	PTCFG ParseTestConfig       `yaml:"parsetest_config"`
 	MTCFG MarkTestConfig        `yaml:"marktest_config"`
 	ATCFG AdvTimeConfig         `yaml:"advtime_config"`
+
+	GraphicSet []ExtraGraphicCfg
 }
 
 type GraphGeneratorConfig struct {

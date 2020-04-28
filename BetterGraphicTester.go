@@ -16,9 +16,9 @@ func main() {
 	}
 
 	initFilesAndDirs(config)
-	//initWriters()
 	initAdvTimeNames(config)
 	initResultNames(config)
+	config.GraphicSet = initStdGraphics(config)
 
 	condition := NewTestState(config)
 
